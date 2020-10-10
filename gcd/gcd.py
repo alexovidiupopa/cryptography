@@ -47,14 +47,59 @@ class BigInteger:
                 result.vec[i+1]-=1
                 result.vec[i]+=10
             i+=1
+
         while result.vec[-1]==0:
+            if result.vec==[0]:
+                break
             result.vec.pop()
         return result
-    def __mul__(self, other):
-        return None
 
-    def __divmod__(self, other):
-        return None, None
+    def __mul__(self, other):
+        result = BigInteger("0")
+        result.vec = [0] * (len(self.vec)+len(other.vec))
+        i1 = 0
+
+        for digit1 in self.vec:
+            carry = 0
+            i2 = 0
+            for digit2 in other.vec:
+                sum = digit1*digit2 + result.vec[i1+i2] + carry
+                carry = sum//10
+                result.vec[i1+i2] = sum%10
+                i2+=1
+
+            if carry>0:
+                result.vec[i1+i2] += carry
+            i1+=1
+
+
+        while result.vec[-1]==0:
+            result.vec.pop()
+        result.vec.reverse()
+        return result
+
+
+    # D = Q*C + R
+    # Q = D/C
+    # R = D-Q*C
+
+    def __floordiv__(self, other):
+        cnt=BigInteger("0")
+        cpy = deepcopy(self)
+        while cpy>other:
+            cpy = cpy - other
+            cnt = cnt + BigInteger("1")
+        if cpy==other:
+            cpy = cpy-other
+            cnt = cnt + BigInteger("1")
+        return cnt
+
+    def __mod__(self,other):
+        divd = self//other
+        print(divd)
+        print(self)
+        print(other)
+        return self-divd*other
 
     def __gt__(self, other):
         if len(self.vec) > len(other.vec):
@@ -76,13 +121,30 @@ class BigInteger:
 
     def __read(self, x:str):
         self.vec = []
-        self.sign = 1
         for char in x:
             self.vec.append(ord(char)-ord('0'))
         self.vec.reverse()
 
+"""
+Function which computes the greatest common divisor of two natural numbers x and y using the subtraction method. 
+One may notice that the method is nothing more than a simplified version of Euclid's algorithm (see below explanation for that), the idea being that instead of using repeated divisions, each division is reduced 
+to many subtractions, which leads to the following recursion: 
+    gcd(a,a)=a,
+    gcd ( a , b ) = gcd ( a − b , b ) ,  if a > b
+    gcd ( a , b ) = gcd ( a , b − a ) ,  if b > a
 
-def gcd_substract(x, y):
+Edge cases: 
+    -gcd_subtract(4,0) = 4 
+    -gcd_subtract(0,4) = 4
+
+Proof of correctness for x=18 y=6
+    gcd_subtract(18,6) = 
+        18>6 => x = 18-6 = 12 
+        12>6 => x = 12-6 = 6
+        6 = 6 => result is 6 
+    
+"""
+def gcd_subtract(x, y):
     if x == BigInteger("0"):
         return y
     if y == BigInteger("0"):
@@ -135,15 +197,16 @@ def gcd_prime_factors(x, y):
 
 
 def main():
-    TESTS = [("18","12"),("30","11"),("4137523", "1227241"),("9427097151","2571923608"), ("737319582759902", "130030194834914")]
+    TESTS = [("240","12")]#,("30","11"),("4137523", "1227241"),("9427097151","2571923608"), ("737319582759902", "130030194834914")]
     for test in TESTS:
         print("Starting test a={},b={}".format(test[0],test[1]))
         start = default_timer()
         x = BigInteger(test[0])
         y = BigInteger(test[1])
         #gcd = gcd_euclidean(x, y)
-        gcd = gcd_substract(x, y)
+        #gcd = gcd_subtract(x, y)
         #gcd = gcd_prime_factors(x, y)
+        gcd=x//y
         end = default_timer()
         print("Time elapsed {} seconds".format(end-start))
         print("Gcd is {}".format(gcd))
