@@ -128,26 +128,6 @@ class BigInteger:
         self.vec.reverse()
 
 
-"""
-Function which computes the greatest common divisor of two natural numbers x and y using the subtraction method. 
-One may notice that the method is nothing more than a simplified version of Euclid's algorithm (see below explanation for that), the idea being that instead of using repeated divisions, each division is reduced 
-to many subtractions, which leads to the following recursion: 
-    gcd(a,a)=a,
-    gcd ( a , b ) = gcd ( a − b , b ) ,  if a > b
-    gcd ( a , b ) = gcd ( a , b − a ) ,  if b > a
-
-Edge cases: 
-    -gcd_subtract(4,0) = 4 
-    -gcd_subtract(0,4) = 4
-
-Proof of correctness for x=18 y=6
-    gcd_subtract(18,6) = 
-        18>6 => x = 18-6 = 12 
-        12>6 => x = 12-6 = 6
-        6 = 6 => result is 6 
-    
-"""
-
 
 def gcd_subtract(x, y):
     if x == BigInteger("0"):
@@ -205,9 +185,9 @@ def main():
         x = BigInteger(test[0])
         y = BigInteger(test[1])
 
-        # gcd = gcd_euclidean(x, y)
-        gcd = gcd_subtract(x, y)
-        # gcd = gcd_basic(x,y)
+        #gcd = gcd_euclidean(x, y)
+        #gcd = gcd_subtract(x, y)
+        gcd = gcd_basic(x,y)
 
         end = default_timer()
         print("Time elapsed {} seconds".format(end - start))

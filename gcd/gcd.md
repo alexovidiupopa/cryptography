@@ -1,10 +1,14 @@
-Lab Assignment 1 - Public Key Cryptography, UBB-CS Year 3<br>
-Popa Alex Ovidiu<br>
-936<br>
+---
+format: markdown
+title: Greatest Common Divisor
+...
+
+### Lab Assignment 1 - Public Key Cryptography, UBB-CS Year 3<br>
+#### Popa Alex Ovidiu, group 936
 
 Problem statement: compute the gcd of 2 numbers in 3 different ways. Arbitrarily large numbers should be supported.
 
-Proposed solution: <br>
+#### Proposed solution: <br>
 <b>Create a custom class to handle arithmetic operations for big integers, given as strings.</b><br>
 The BigInteger class supports the following operations: +, -, *, //, %, >,>=,<=,<,==,!= <br>
 
@@ -25,6 +29,11 @@ class BigInteger:
             result += str(digit)
         return result
 
+    """
+    Adding two BigInteger variables is the same as doing basic arithmetic in primary school, 
+    i.e. there is a carry we add with each digit sum which is first initialized with 0 and is made 1 
+    if digit1 + digit2  > 9.
+    """
     def __add__(self, other):
         result = BigInteger("0")
         result.vec = []
@@ -49,7 +58,13 @@ class BigInteger:
             result.vec.append(carry)
 
         return result
-
+    
+    """
+    Subtracting two BigInteger variables is (again), the same as doing basic arithmetic in primary school, 
+    i.e. there is a carry we subtract after subtracting digit2 from digit1 which is first initialized with 0 and is made 1 
+    if digit1 - digit2 - carry < 0. Furthermore, if this happens, we need to add the base (in our case, 10), 
+    to the previously computed digit.
+    """
     def __sub__(self, other):
         result = deepcopy(self)
         i = 0
@@ -71,6 +86,10 @@ class BigInteger:
 
         return result
 
+    """
+    Multiplication is a bit brute force, because we multiply each digit with each digit and also add up 
+    the respective result to the others computed so far for the same "position". 
+    """
     def __mul__(self, other):
         result = BigInteger("0")
         result.vec = [0] * (len(self.vec) + len(other.vec))
@@ -93,7 +112,11 @@ class BigInteger:
             result.vec.pop()
 
         return result
-
+    
+    """
+    For integer division, subtractions are made until the current number is < the other number, and the number 
+    of subtractions is counted.
+    """
     def __floordiv__(self, other):
         cnt = BigInteger("0")
         cpy = deepcopy(self)
@@ -103,7 +126,13 @@ class BigInteger:
         if cpy == other:
             cnt = cnt + BigInteger("1")
         return cnt
-
+    
+    """
+    Now, modulo is interesting because it makes use of the remainder theorem, i.e. 
+    D = P * Q + R, R<Q
+    From where we can easily conclude that R = D - P*Q, and that is exactly how the function computes 
+    the modulo (remainder)
+    """
     def __mod__(self, other):
         divd = deepcopy(self) // deepcopy(other)
         return self - (divd * other)
@@ -132,6 +161,10 @@ class BigInteger:
     def __eq__(self, other):
         return self.vec == other.vec
 
+    """
+    The big integers are passed as strings, but kept as an array of digits in reverse order, for example 
+    "1234" is kept as [4,3,2,1]. 
+    """
     def __read(self, x):
         self.vec = []
         for char in x:
@@ -143,20 +176,21 @@ class BigInteger:
 
 Function which computes the greatest common divisor of two natural numbers x and y using the subtraction method. 
 One may notice that the method is nothing more than a simplified version of Euclid's algorithm (see below explanation for that), the idea being that instead of using repeated divisions, each division is reduced 
-to many subtractions, which leads to the following recursion: 
-    gcd(a,a)=a <br>
-    gcd(a, b) = gcd(a − b, b) , if a > b <br>
-    gcd(a , b) = gcd(a , b − a) , if b > a <br>
-
-Edge cases: <br>
-    -gcd_subtract(4,0) = 4 <br>
-    -gcd_subtract(0,4) = 4<br>
+to many subtractions, which leads to the following recursion: <br>
+\begin{align*}
+gcdSubtract(a,b)=\begin{cases} 
+      a & a = b \\
+      gcdSubtract(a-b,b) & a < b \\
+      gcdSubtract(a,b-a) & otherwise
+\end{cases}
+\end{align*}
 
 Proof of correctness for x=18 y=6<br>
-    gcd_subtract(18,6) = <br>
+    gcdSubtract(18,6) = <br>
         18>6 => x = 18-6 = 12 <br>
         12>6 => x = 12-6 = 6<br>
         6 = 6 => result is 6 <br>
+        
 ~~~~~{.python}
 <<gcd_subtract>>=
 def gcd_subtract(x, y):
@@ -175,16 +209,14 @@ def gcd_subtract(x, y):
 
 Function which computes the greatest common divisor of two natural numbers x and y using the Euclidean method.<br>
 The recursion can be defined as:<br>
-    gcd(a,b) = a , b = 0<br>
-    gcd(a,b) = gcd(b,a%b), otherwise<br>
-
-
-Edge cases:<br> 
-    -gcd_euclidean(4,0) = 4<br> 
-    -gcd_euclidean(0,4) = 4<br>
-
+\begin{align*}
+gcdEuclidean(a,b)=\begin{cases} 
+      a & b = 0 \\
+      gcdEuclidean(b, a \% b) & otherwise \\
+\end{cases}
+\end{align*}
 Proof of correctness for x=18 y=12 <br>
-    gcd_euclidean(18,12) = <br>
+    gcdEuclidean(18,12) = <br>
         12!=0 => x = 12, y = 18%12 = 6 <br>
         6!=0 => x = 6, y=12%6 = 0   <br>
         0=0 => x = 6 is returned    <br>
@@ -211,7 +243,7 @@ which divides both of them. Be warned, this method is <b>highly</b> inefficient 
 For this <br>
 
 Proof of correctness for x=30 y=20<br>
-    gcd_basic(30,20) = <br>
+    gcdBasic(30,20) = <br>
         min (30,20) = 20 <br>
         30 % 20 != 0 <br>
         i = 20 // 2 = 10 <br>
@@ -239,7 +271,8 @@ def gcd_basic(x, y):
 ~~~~~
 
 To change the tests, simply change the strings you want in the tests array.<br>
-To change the used method, comment out the current one (gcd_subtract) uncomment the preferred one.
+To change the used method, comment out the current one (gcd euclidean) and uncomment the preferred one.<br>
+
 ~~~~~{.python}
 <<*>>=
 <<BigInteger>>
@@ -247,7 +280,7 @@ To change the used method, comment out the current one (gcd_subtract) uncomment 
 <<gcd_subtract>>
 <<gcd_basic>>
 def main():
-    tests = [("18", "12"), ("30", "11"), ("4137524", "1227244"), ("9427097152", "25719608"),
+    tests = [("18", "12"), ("30", "11"), ("4137524", "3997244"), ("9427097152", "25719608"),
              ("737319582759902", "130030194834914"), ("2183651267535555", "85765424658761005"),
              ("9876542316549876542361978", "4478954814555567000102"),
              ("73498174143914", "13245125243635476"),
@@ -255,14 +288,14 @@ def main():
              ("1285497153615581795397428674243824621432424572421437927424242424258923463862",
               "21312314614141414143426463464574000000789798987893213215446546549808900024")]
     for test in tests:
-        print("\nStarting test with a={},b={}".format(test[0], test[1]))
+        print("Starting test with a={},b={}".format(test[0], test[1]))
         start = default_timer()
         x = BigInteger(test[0])
         y = BigInteger(test[1])
 
-        # gcd = gcd_euclidean(x, y)
-        gcd = gcd_subtract(x, y)
-        # gcd = gcd_basic(x,y)
+        gcd = gcd_euclidean(x, y)
+        #gcd = gcd_subtract(x, y)
+        #gcd = gcd_basic(x,y)
 
         end = default_timer()
         print("Time elapsed {} seconds".format(end - start))
