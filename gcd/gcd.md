@@ -29,11 +29,35 @@ class BigInteger:
             result += str(digit)
         return result
 
-    """
-    Adding two BigInteger variables is the same as doing basic arithmetic in primary school, 
-    i.e. there is a carry we add with each digit sum which is first initialized with 0 and is made 1 
-    if digit1 + digit2  > 9.
-    """
+<<BigIntegerRead>>
+<<BigIntegerAdd>>
+<<BigIntegerSub>>
+<<BigIntegerMul>>
+<<BigIntegerDiv>>
+<<BigIntegerMod>>
+<<BigIntegerRelationals>>
+@
+~~~~~
+
+The big integers are passed as strings, but kept as an array of digits in reverse order, for example 
+"1234" is kept as the list [4,3,2,1]. 
+
+~~~~~{.python}
+<<BigIntegerRead>>=
+    def __read(self, x):
+        self.vec = []
+        for char in x:
+            self.vec.append(ord(char) - ord('0'))
+        self.vec.reverse()
+@
+~~~~~
+
+Adding two BigInteger variables is the same as doing basic arithmetic in primary school, 
+i.e. there is a carry we add with each digit sum which is first initialized with 0 and is made 1 
+if digit1 + digit2  > 9.<br>
+
+~~~~~{.python}
+<<BigIntegerAdd>>=  
     def __add__(self, other):
         result = BigInteger("0")
         result.vec = []
@@ -59,12 +83,16 @@ class BigInteger:
 
         return result
     
-    """
-    Subtracting two BigInteger variables is (again), the same as doing basic arithmetic in primary school, 
-    i.e. there is a carry we subtract after subtracting digit2 from digit1 which is first initialized with 0 and is made 1 
-    if digit1 - digit2 - carry < 0. Furthermore, if this happens, we need to add the base (in our case, 10), 
-    to the previously computed digit.
-    """
+@
+~~~~~
+
+Subtracting two BigInteger variables is (again), the same as doing basic arithmetic in primary school, 
+i.e. there is a carry we subtract after subtracting digit2 from digit1 which is first initialized with 0 and is made 1 
+if digit1 - digit2 - carry < 0. Furthermore, if this happens, we need to add the base (in our case, 10), 
+to the previously computed digit.<br>
+
+~~~~~{.python}
+<<BigIntegerSub>>=
     def __sub__(self, other):
         result = deepcopy(self)
         i = 0
@@ -85,11 +113,14 @@ class BigInteger:
             result.vec.pop()
 
         return result
+@
+~~~~~
 
-    """
-    Multiplication is a bit brute force, because we multiply each digit with each digit and also add up 
-    the respective result to the others computed so far for the same "position". 
-    """
+Multiplication is a bit brute force, because we multiply each digit with each digit and also add up 
+the respective result to the others computed so far for the same "position". <br>
+
+~~~~~{.python}
+<<BigIntegerMul>>=
     def __mul__(self, other):
         result = BigInteger("0")
         result.vec = [0] * (len(self.vec) + len(other.vec))
@@ -113,10 +144,14 @@ class BigInteger:
 
         return result
     
-    """
-    For integer division, subtractions are made until the current number is < the other number, and the number 
-    of subtractions is counted.
-    """
+@
+~~~~~
+
+For integer division, subtractions are made until the current number is < the other number, and the number 
+of subtractions is counted.<br>
+
+~~~~~{.python}
+<<BigIntegerDiv>>=
     def __floordiv__(self, other):
         cnt = BigInteger("0")
         cpy = deepcopy(self)
@@ -127,16 +162,28 @@ class BigInteger:
             cnt = cnt + BigInteger("1")
         return cnt
     
-    """
-    Now, modulo is interesting because it makes use of the remainder theorem, i.e. 
-    D = P * Q + R, R<Q
-    From where we can easily conclude that R = D - P*Q, and that is exactly how the function computes 
-    the modulo (remainder)
-    """
+@
+~~~~~
+
+Now, modulo is interesting because it makes use of the remainder theorem, i.e. <br> 
+    \begin{align*}
+        D = P \cdot  Q + R, && 0 \leq R < Q
+    \end{align*}
+    From where we can easily conclude that $R = D - P \cdot Q$, and that is exactly how the function computes 
+    the modulo (remainder)<br>
+    
+~~~~~{.python}
+<<BigIntegerMod>>=
     def __mod__(self, other):
         divd = deepcopy(self) // deepcopy(other)
         return self - (divd * other)
+@
+~~~~~
 
+Below all the relational operators have been implemented, using basic comparisons of two lists.<br>
+
+~~~~~{.python}
+<<BigIntegerRelationals>>=
     def __gt__(self, other):
         if len(self.vec) > len(other.vec):
             return True
@@ -161,16 +208,6 @@ class BigInteger:
     def __eq__(self, other):
         return self.vec == other.vec
 
-    """
-    The big integers are passed as strings, but kept as an array of digits in reverse order, for example 
-    "1234" is kept as [4,3,2,1]. 
-    """
-    def __read(self, x):
-        self.vec = []
-        for char in x:
-            self.vec.append(ord(char) - ord('0'))
-        self.vec.reverse()
-
 @
 ~~~~~
 
@@ -185,12 +222,14 @@ gcdSubtract(a,b)=\begin{cases}
 \end{cases}
 \end{align*}
 
-Proof of correctness for x=18 y=6<br>
-    gcdSubtract(18,6) = <br>
-        18>6 => x = 18-6 = 12 <br>
-        12>6 => x = 12-6 = 6<br>
-        6 = 6 => result is 6 <br>
-        
+Running example for x=18 y=6:<br>
+\begin{align*}
+gcdSubtract(18,6) &= ?  \\
+18 \textgreater 6 \implies x &= 18 - 6  \\
+12 \textgreater 6 \implies x &= 12 - 6  \\
+6 = 6 \implies gcdSubtract(18,6) &= 6
+\end{align*}
+     
 ~~~~~{.python}
 <<gcd_subtract>>=
 def gcd_subtract(x, y):
@@ -215,11 +254,12 @@ gcdEuclidean(a,b)=\begin{cases}
       gcdEuclidean(b, a \% b) & otherwise \\
 \end{cases}
 \end{align*}
-Proof of correctness for x=18 y=12 <br>
-    gcdEuclidean(18,12) = <br>
-        12!=0 => x = 12, y = 18%12 = 6 <br>
-        6!=0 => x = 6, y=12%6 = 0   <br>
-        0=0 => x = 6 is returned    <br>
+\begin{align*}
+gcdEuclidean(18,12) &= ?  \\
+12 \ne 0 \implies x &= 12 \\ y &= 6  \\
+6 \ne 0 \implies x &= 6  \\ y &= 0 \\
+0 = 0 \implies gcdEuclidean(18,12) &= 6
+\end{align*}  
         
 ~~~~~{.python}
 <<gcd_euclidean>>=
@@ -240,15 +280,15 @@ def gcd_euclidean(x, y):
 
 Function which computes the greatest common divisor of two natural numbers x and y by finding the first (biggest) number 
 which divides both of them. Be warned, this method is <b>highly</b> inefficient when |x-y| amounts to a big number.<br>
-For this <br>
 
-Proof of correctness for x=30 y=20<br>
-    gcdBasic(30,20) = <br>
-        min (30,20) = 20 <br>
-        30 % 20 != 0 <br>
-        i = 20 // 2 = 10 <br>
-        30 % 10 == 0 & 20 % 10 == 0 => 10 is returned
-        
+Running example for x=30 y=20<br>
+\begin{align*}
+gcdBasic(30,20) &= ? \\
+min(30,20)=20 \\
+30 \bmod 20 \ne 0 \\
+i = 20 / 2 = 10 \\
+30 \bmod 10 = 0 \& 20 \bmod 10 = 0 \implies gcdBasic(30,20) &= 10
+\end{align*}
         
 ~~~~~{.python}
 <<gcd_basic>>=
