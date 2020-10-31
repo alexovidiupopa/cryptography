@@ -7,19 +7,10 @@ title: Euler's $\varphi$ Function
 ### Lab Assignment 2 - Public Key Cryptography, UBB-CS Year 3
 #### Popa Alex Ovidiu, group 936
 
-Problem Statement: Write an algorithm for computing the value of Euler’s function for natural numbers.  For a given <b>value v</b> and a given <b>bound b</b>,  list all natural numbers less than b which have v as the value of Euler’s function. <br>
+Problem Statement: Write an algorithm for computing the value of Euler’s function for natural numbers.  For a given <b>value v</b> and a given <b>bound b</b>,  list all natural numbers less than b which have v as the value of Euler’s function. 
 
 #### Proposed solution:
-##### Compute the Euler function for a value n using Euler's product formula.</b><br>
-
-Before getting into Euler's product formula, it is worth mentioning that one may think about a naive solution out of instinct before solving the problem. \newline
-The basic solution would take all natural numbers d less than a natural number n and check if they are coprimes with n, i.e. 
-\begin{align*}
-gcd(n, d) &= 1. \\
-\end{align*}
-The count of all those numbers would be returned, and its equality checked with the given value v. \
-This would happen for each number up to the given bound b. \
-Implementing this was skipped as it's quite trivial to conclude its immense running time as v and b grow larger. 
+##### Compute the Euler function for a value n using Euler's product formula.
 
 ##### Euler's Product Formula
 The first implemented function is nothing more than the theorem presented in the second lecture, the formula of which is: 
@@ -35,17 +26,17 @@ where
 are the prime factors of n.
 Or, equivalently,
 \begin{align}
-\varphi(n) = n \cdot \prod_{p\mid n}\left(1 - \frac1p\right).
+\varphi(n) = n \cdot \prod_{p\mid n}(1 - \frac1p).
 \end{align}
 
 
-To prove (1), we will use two the other theorems stated in the lecture, namely the formula for $\varphi(p^k)$ (for p prime), as well as the multiplicative property of $\varphi$:
+To prove (1), we will use two the other theorems stated in the lecture, namely the formula for $\varphi(n=p^k)$ (for p prime factor, k its power), as well as the multiplicative property of $\varphi$:
 
 \begin{align*} 
-\varphi(n)&= \varphi\left(p_1^{k_1}\right) \varphi\left(p_2^{k_2}\right) \cdots\varphi\left(p_j^{k_j}\right)\\
-&= p_1^{k_1} \left(1- \frac{1}{p_1} \right) p_2^{k_2} \left(1- \frac{1}{p_2} \right) \cdots p_j^{k_j} \left(1- \frac{1}{p_j} \right)\\
-&= p_1^{k_1} p_2^{k_2} \cdots p_j^{k_j} \left(1- \frac{1}{p_1} \right) \left(1- \frac{1}{p_2} \right) \cdots \left(1- \frac{1}{p_j} \right)\\
-&=n \left(1- \frac{1}{p_1} \right)\left(1- \frac{1}{p_2} \right) \cdots\left(1- \frac{1}{p_j} \right). \\
+\varphi(n)&= \varphi(p_1^{k_1}) \varphi(p_2^{k_2}) \cdots\varphi(p_j^{k_j})\\
+&= p_1^{k_1} (1- \frac{1}{p_1}) p_2^{k_2} (1- \frac{1}{p_2}) \cdots p_j^{k_j} (1- \frac{1}{p_j})\\
+&= p_1^{k_1} p_2^{k_2} \cdots p_j^{k_j} (1- \frac{1}{p_1}) (1- \frac{1}{p_2}) \cdots (1- \frac{1}{p_j})\\
+&=n (1- \frac{1}{p_1})(1- \frac{1}{p_2}) \cdots(1- \frac{1}{p_j}). \\
 \implies (1)
 \end{align*}
 
@@ -53,129 +44,148 @@ To prove (1), we will use two the other theorems stated in the lecture, namely t
 Running example for $\varphi$(10):
 
 \begin{enumerate}
-\item n = 10 result = 10
-\item 2 is a prime factor, so n = n/i = 5, result = 10 * (1.0 - 1.0/2.0) = 10 * (1.0 - 0.5) = 10 * 0.5 = 5.0
-\item 3 is not a prime factor.
-The for loop stops after 3 as 4*4=16 is not less than or equal to 5.
-\item After the for loop, result = 5.0, n = 5
-\item n > 1 => result = 5.0 * (1.0 - 1.0/5.0) = 5.0 * 0.8 = 4.0 
-\item $\left \lfloor{x}\right \rfloor$  = 4 is returned
+\item n = 10, eulercount = 10
+\item primefactor = 2 is a prime factor, so n = n/primefactor = 5, eulercount = 10 * (1.0 - 1.0/2.0) = 10 * (1.0 - 0.5) = 10 * 0.5 = 5.0
+\item primefactor = 3 is not a prime factor.
+\item 4*4=16 > 5 => the for loop ends.
+\item After the for loop, eulercount = 5.0, n = 5
+\item n > 1 => eulercount = 5.0 * (1.0 - 1.0/5.0) = 5.0 * 0.8 = 4.0 
+\item $\left \lfloor{n}\right \rfloor$  = 4 is returned
 \end{enumerate}
 
 ~~~~~{.python}
 <<EulersFunctionFractions>>=
+from math import sqrt
 def phiFractions(n):
-    result = n
-    p = 2
-    while p * p <= n:
-        if n % p == 0:
-            while n % p == 0:
-                n //= p
-            result = result * (1.0 - (1.0 / float(p)))
-        p += 1
-
-    if n > 1:
-        result = result * (1.0 - (1.0 / float(n)))
-    return int(result)
+    euler_count = n  # start from n as the theorem shows
+    for prime_factor in range(2,int(sqrt(n))+1):
+        if n % prime_factor == 0:
+            while n % prime_factor == 0:
+                n //= prime_factor
+            euler_count = euler_count * (1.0 - (1.0 / float(prime_factor)))
+    if n > 1: #check for sqrt edge case
+        euler_count = euler_count * (1.0 - (1.0 / float(n)))
+    return int(euler_count)
 @
 ~~~~~
 
-As one can notice, some explicit type calls are made because of python implementation details, and this leads to having floating point errors, just take this example:
+The function below implements the first formula for testing the Euler function from the slides.
 
 ~~~~~{.python}
->>> 2**739 + 1
-2891790293717214716875887454417538932071786405736015385275803577203398482289867 \
-2639036148950991155168981994142702428124959982559906594723303695903626106328129851 \
-35197678301307466375242232528412389127536106326559094512549889
->>> 2.0 ** 739 + 1
-2.891790293717215e+222
+<<EulerTestDivisors>>=
+<<EulersFunctionFractions>>
+def eulerTestDivisors(n):
+    d = 1
+    sum = 0
+    while d<=n//2:
+        if n%d==0:
+            sum+=phiFractions(d)
+        d+=1
+    sum+=phiFractions(n)
+    return sum == n
 @
 ~~~~~
 
-This algorithm is better than the one presented above because it basically finds all numbers that have gcd(n, d) $\ne$ 1, and when such a number is found,
-it is taken out of the result the along with all of its multiples below n. <br>
-
-
-Running example for $\varphi$(15):
-
-\begin{enumerate}
-\item n = 15 result = 15
-\item 2 is not a prime factor.
-\item 3 is a prime factor, so n = n/i = 5, result = 5
-The for loop stops after 3 as 4*4=16 is not less than or equal
-to 5.
-\item After the for loop, result = 5, n = 5
-\item n > 1 => result = result - result/n = 4
-\item 4 is returned.
-\end{enumerate}
-
+The function below implements the second formula for testing the Euler function from the slides, namely the one proposed by Prof. Andrica, which says that the respectiv sum has to converge to value 2.
 
 ~~~~~{.python}
-<<EulersFunction>>=
-def phi(n):
-    result = n
-    p = 2
-    while p * p <= n:
-        if n % p == 0:
-            while n % p == 0:
-                n //= p
-            result -= result//p
-        p += 1
+<<EulerTestAndrica>>=
+<<EulersFunctionFractions>>
+from math import ceil
+def eulerTestAndrica(n):
+    sum = 0.0
+    for i in range(1, n+1): 
+        sum += (phiFractions(i)) / (2.0**i - 1)
+    return ceil(sum)==2.0
+@
+~~~~~
 
-    if n > 1:
-        result -= result // n
-    return result
+Group the two tests into a single one and run it with a default value of 1000, which can be changed accordingly. \
+Please note that 1000 is already kind of testing the limits of python's numeric capabilities, and testing for 2000 will result in an overflow.
+
+~~~~~{.python}
+<<MainTest>>=
+<<EulerTestDivisors>>
+<<EulerTestAndrica>>
+def runTests(n=1000):
+    assert(eulerTestAndrica(n) and eulerTestDivisors(n) is True) 
+    print("Tests passed!")
 @
 ~~~~~
 
 The actual algorithm concerning the value v and bound b is trivial, in the sense that it iterates until the bound and compares the result of the euler function with the value and adds the current number to a list if the two are equal.
-The function below does just that, namely prints out the values of the euler function for each bound which match the corresponding value, and the chosen implementation is given by the 'function' parameter.<br>
+The function below does just that, namely prints out the values of the euler function for each bound which matches the corresponding value. \
 Furthermore, it returns the running time taken by the algorithm, to be used in the main function. 
 
 ~~~~~{.python}
 <<RunnerFunction>>=
 <<EulersFunctionFractions>>
-<<EulersFunction>>
 from timeit import default_timer as time
-def runner(values, bounds, function):
+def runner(value, bound, function):
+    result=[]
     start = time()
-    for k in range(len(bounds)):
-        result = []
-        for i in range(1, bounds[k]):
-            if function(i) == values[k]:
-                result.append(i)
-        print("(" + str(values[k]) + "," + str(bounds[k]) + ")->" + str(result))
+    for i in range(1, bound):
+        if function(i) == value:
+            result.append(i)
     end = time()
-    return end - start
-
+    print("(" + str(value) + "," + str(bound) + ")->" + str(result) 
++ "->time elapsed:" + str(end-start))
+        
 @
 ~~~~~
 
-In the main function some values and bounds were set, and some running time comparisons between the two algorithms were made. <br>
-Although they perform quite equally running time-wise, the first one loses when dealing with big numbers, as mentioned before.
+The function below plots the histogram for a bound b, defaulted to 1000. \
+First it keeps in a dictionary the value of the Euler function for each number up to the bound b, and then fetches the top 5 most common values. \
+For b=1000, those are: 240, 288, 192, 144, 216. One can notice that the common values result from combinations of the powers of 2,3 and 5, for instance: 
+\begin{align*}
+240 &= 2^{4} * 3 * 5 \\
+288 &= 2^{5} * 3^{2} \\
+\end{align*}
+Furthermore, for large numbers, one can notice from the plotted distribution that the values with the highest frequency are mostly located in the first 40%, i.e. for b=10000, most of them are <=4000.
+
+~~~~~{.python}
+<<Histogram>>=
+<<EulersFunctionFractions>>
+import matplotlib.pylab as pyplt
+
+def histogram(b=1000):
+    data = {i:0 for i in range(1, b+1)}
+    for n in range(1,b+1):
+        data[phiFractions(n)]+=1
+    
+    results = sorted(data.items(), key=lambda pair: pair[1])
+    values = [pair[0] for pair in results]
+
+    values.reverse()
+    print("For bound = {}, ".format(b) + "the top 5 repeated values are: " + str(values[:5]))
+
+    resultsToPlot = sorted(data.items(), key=lambda pair: pair[0])
+    xAxis = [pair[0] for pair in resultsToPlot]
+    yAxis = [pair[1] for pair in resultsToPlot]
+
+    pyplt.plot(xAxis, yAxis, color='red')
+    pyplt.title("Euler function distribution for b={}".format(b))
+    pyplt.show()
+@
+~~~~~
+
+In the main function the runner function is called for a value and a bound, which can be arbitrarily set.
 
 ~~~~~{.python}
 <<*>>=
 
 <<RunnerFunction>>
+<<MainTest>>
+<<Histogram>>
 
 def main():
-    values = [12, 24, 36, 48, 128, 256, 1000]
-    bounds = [468, 666, 41423, 12312, 50000, 80000, 1000000]
+    value = 12
+    bound = 468
+    runner(value,bound,phiFractions)
 
-    print("Results for euler's formula with fractions: ")
-
-    rt1 = runner(values, bounds, phiFractions)
-    print("Running time for euler's product function: " + str(rt1))
-
-    print("\nResults for euler's formula with fractions, without floating point issues: ")
-
-    rt2 = runner(values, bounds, phi)
-    print("Running time for euler's product function, without floating point issues: " 
-+ str(rt2))
-
-    print("\nThe difference between the two times is: " + str(abs(rt1 - rt2)))
+runTests()
 main()
+histogram()
 
 @
 ~~~~~
