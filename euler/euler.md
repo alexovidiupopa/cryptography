@@ -69,12 +69,12 @@ def phiFractions(n):
 @
 ~~~~~
 
-The function below implements the first formula for testing the Euler function from the slides.
+The function below implements the first formula for testing the Euler function from the slides, namely the Gaussian one.
 
 ~~~~~{.python}
-<<EulerTestDivisors>>=
+<<EulerTestGaussian>>=
 <<EulersFunctionFractions>>
-def eulerTestDivisors(n):
+def eulerTestGaussian(n):
     d = 1
     sum = 0
     while d<=n//2:
@@ -105,10 +105,10 @@ Please note that 1000 is already kind of testing the limits of python's numeric 
 
 ~~~~~{.python}
 <<MainTest>>=
-<<EulerTestDivisors>>
+<<EulerTestGaussian>>
 <<EulerTestAndrica>>
 def runTests(n=1000):
-    assert(eulerTestAndrica(n) and eulerTestDivisors(n) is True) 
+    assert(eulerTestAndrica(n) and eulerTestGaussian(n) is True) 
     print("Tests passed!")
 @
 ~~~~~
@@ -135,12 +135,13 @@ def runner(value, bound, function):
 ~~~~~
 
 The function below plots the histogram for a bound b, defaulted to 1000. \
-First it keeps in a dictionary the value of the Euler function for each number up to the bound b, and then fetches the top 5 most common values. \
-For b=1000, those are: 240, 288, 192, 144, 216. One can notice that the common values result from combinations of the powers of 2,3 and 5, for instance: 
+First it keeps in a python dictionary the value frequency of the Euler function for each number up to the bound b, and then fetches the top 5 most common values. \
+For b=1000, those are: 240, 288, 192, 144, 216. If we take a look at the two most frequent numbers, for instance: 
 \begin{align*}
 240 &= 2^{4} * 3 * 5 \\
 288 &= 2^{5} * 3^{2} \\
 \end{align*}
+We can see that they can all be easily decomposed into products of the powers of 2 and 3, and most divisors in general are combinations of 2^k and 3^p.
 Furthermore, for large numbers, one can notice from the plotted distribution that the values with the highest frequency are mostly located in the first 40%, i.e. for b=10000, most of them are <=4000.
 
 ~~~~~{.python}
@@ -149,21 +150,24 @@ Furthermore, for large numbers, one can notice from the plotted distribution tha
 import matplotlib.pylab as pyplt
 
 def histogram(b=1000):
-    data = {i:0 for i in range(1, b+1)}
+    # keep a map of {value:frequency} for all values up to the bound
+    map = {i:0 for i in range(1, b+1)}
     for n in range(1,b+1):
-        data[phiFractions(n)]+=1
+        map[phiFractions(n)]+=1
     
-    results = sorted(data.items(), key=lambda pair: pair[1])
+    results = sorted(map.items(), key=lambda pair: pair[1])
     values = [pair[0] for pair in results]
 
     values.reverse()
     print("For bound = {}, ".format(b) + "the top 5 repeated values are: " + str(values[:5]))
 
-    resultsToPlot = sorted(data.items(), key=lambda pair: pair[0])
+    resultsToPlot = sorted(map.items(), key=lambda pair: pair[0])
     xAxis = [pair[0] for pair in resultsToPlot]
     yAxis = [pair[1] for pair in resultsToPlot]
 
     pyplt.plot(xAxis, yAxis, color='red')
+    pyplt.xlabel('Value')
+    pyplt.ylabel('Frequency')
     pyplt.title("Euler function distribution for b={}".format(b))
     pyplt.show()
 @
