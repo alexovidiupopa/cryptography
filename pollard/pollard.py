@@ -16,10 +16,8 @@ def pollard(n, x0, f):
     x = [x0]
     j = 1
     while True:
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
+        x.append(funcall(f, x[-1]) % n) # tortoise
+        x.append(funcall(f, x[-1]) % n) # hare
         d = gcd(abs(x[2 * j] - x[j]), n)
         if 1 < d < n:
             return d
@@ -73,10 +71,8 @@ def pollard(n, x0, f):
     x = [x0]
     j = 1
     while True:
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
+        x.append(funcall(f, x[-1]) % n) # tortoise
+        x.append(funcall(f, x[-1]) % n) # hare
         d = gcd(abs(x[2 * j] - x[j]), n)
         if 1 < d < n:
             return d
@@ -148,10 +144,8 @@ def pollard(n, x0, f):
     x = [x0]
     j = 1
     while True:
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
+        x.append(funcall(f, x[-1]) % n) # tortoise
+        x.append(funcall(f, x[-1]) % n) # hare
         d = gcd(abs(x[2 * j] - x[j]), n)
         if 1 < d < n:
             return d
@@ -200,12 +194,12 @@ import sys
 def main():
     n = 7031
     f = '[1,0,1]'
-    params = sys.argv[1:]
-    if len(params) == 4 and params[0] == "-n" and params[2] == "-f":
-        n = int(params[1])
-        f = params[3]
-    elif len(params) == 2 and params[0] == "-n":
-        n = int(params[1])
+    args = sys.argv[1:]
+    if len(args) == 4 and args[0] == "-nr" and args[2] == "-func":
+        n = int(args[1])
+        f = args[3]
+    elif len(args) == 2 and args[0] == "-nr":
+        n = int(args[1])
     print("Running Pollard with n={} and f={}".format(n, f))
     result, iters = pollardRunner(n, f)
     print("Result is {}, reached in {} iterations".format(result, iters))

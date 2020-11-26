@@ -16,9 +16,9 @@ but it will also allow the use of a function f given by the user.
 
 Proposed Solution:
 \begin{enumerate}
-\item implement a runner function for Pollard's $\rho$ algorithm for an arbitrary number and function.
-\item implement a function to test the function result against known results for a set of numbers
-\item implement a function to plot the size of the result of Pollard vs the number of iterations needed to achieve it
+\item Implement a runner function for Pollard's $\rho$ algorithm for an arbitrary number and function.
+\item Implement tester functions to check the results against already known factorizations.
+\item Implement a function to plot the size of the result of Pollard vs the number of iterations needed to achieve it.
 \end{enumerate}
 
 Pollard's $\rho$ method aims to find a non-trivial factor of a given composite number (n=p*q), and bases itself around two important principles: 
@@ -27,16 +27,11 @@ Pollard's $\rho$ method aims to find a non-trivial factor of a given composite n
 \item The Birthday Problem
 \end{enumerate}
 
-To put it shortly, **Floyd's Tortoise and Hare principle** is inspired from the children story, in the sense that we have two pointers, one for each "animal", and one progresses slower than the other one, and they will eventually meet if there is a cycle to be found. \
+To put it shortly, *Floyd's Tortoise and Hare principle* is inspired from the children story, in the sense that we have two pointers, one for each "animal", and one progresses slower than the other one, and they will eventually meet if there is a cycle to be found. \
 I think the best example to understand it in the field of CS, or at least that is how I managed to grasp the concept, is to think about how you would find a cycle in a Linked List: you would take a fast pointer, which always skips an element, and a slow pointer, which takes them one by one. The "hare" will catch up with the "tortoise" at a certain lap, as the "hare" loops repeatedly, and thus prove that there is a cycle and its starting point is where they met.   
 
-The **Birthday Problem** says that in a set of n randomly chosen people, some pair of them will have the same birthday with a certain probability P. Naively, P reaches 100% when n=367, because the number of days covers more than a year, however P reaches 99.9% when n=70. \
+The *Birthday Problem* says that in a set of n randomly chosen people, some pair of them will have the same birthday with a certain probability P. Naively, P reaches 100% when n=367, because the number of days covers more than a year, however P reaches 99.9% when n=70. \
 This is closely related to the notion of mutually exclusive events in probability and statistics, which says that P(A) = 1 - P(nonA), meaning that if event A happens with a probability P(A), then its complementary event nonA happens with probability 1 - P(A). \
-Some remarks about the implementation:
-\begin{enumerate}
-\item The algorithm will run indefinitely for prime numbers, so the number is checked beforehand for primality.
-\item The algorithm may not find the factors and return a failure for composite n. In that case, the constant number from the polynomial is increased until a result is found. 
-\end{enumerate}
 
 Euler's algorithm for gcd implementation, needed for Pollard's algorithm below. 
 
@@ -52,7 +47,7 @@ def gcd(x, y):
 @
 ~~~~~
 
-Basic implementation of primality testing- this is needed because one must test that a number is prime, because if Pollard's runs on a prime numbers, it enters an infinite loop due to the gcd computation.
+Basic implementation of primality testing- see the explanation below as to why it's needed.
 
 ~~~~~{.python}
 <<Primality>>=
@@ -90,9 +85,10 @@ Pollard's $\rho$ Algorithm implementation, following the algorithm from the lect
 Now, where do the two principles presented above come into play in the implementation? \
 Well, if we take a look at xj = f(xj-1) and xj+1 = f(xj) = f(f(xj-1)), we can easily associate the first number to the "tortoise" and the second one to the "hare", as the latter is always one step ahead.
 This decreases the cost of computing numerous GCD calculations, and ensures the cycle can be found. \
-The idea is that when we use a polynomial, say x^2+1, we generate a sequence of numbers which seems random, but it's in fact pseudorandom, as it can be replicated. \
-Generating the sequence numbers modulo n makes use of the birthday paradox, i.e. the numbers will be repeated more often than they would if modulo n wouldn't be used, due to the fact that if we try finding two numbers x and y in the interval \[1,n-1] which have the same result mod n, it is clear that x=y. \
-As far as I've tested, using f=x^2-2 requires the algorithm to do about 10x more iterations until it finds the solutions, and I believe that it's exactly because of these two principles, i.e. the cycles are longer. \
+The idea is that when we use a polynomial, say x^2+1, we generate a sequence of numbers which seems random, but it's in fact pseudorandom, as it can be replicated by also using another function. \
+I think this is where the birthday paradox is used, however how the 'pseudorandomness' is influenced by the paradox is not fully clear to me. \
+As far as I've tested, using f=x^2-2 requires the algorithm to do about 10x more iterations until it finds the solutions, and I believe that it's because it takes longer to find a cycle. \
+\textit {General remark about the algorithm:} it runs indefinitely for prime numbers, so the number is checked beforehand for primality.
 
 
 ~~~~~{.python}
@@ -103,10 +99,8 @@ def pollard(n, x0, f):
     x = [x0]
     j = 1
     while True:
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
-        xj = funcall(f, x[-1]) % n
-        x.append(xj)
+        x.append(funcall(f, x[-1]) % n) # tortoise
+        x.append(funcall(f, x[-1]) % n) # hare
         d = gcd(abs(x[2 * j] - x[j]), n)
         if 1 < d < n:
             return d
@@ -118,7 +112,7 @@ def pollard(n, x0, f):
 ~~~~~
 
 Pollard Function runner, with x0 going from 2 until a solution is found. \
-Another posibility which wasn't implemented is to randomly generate a new free element of the coefficient.
+Another possibility which wasn't implemented is to randomly generate a new free element of the coefficient.
 
 ~~~~~{.python}
 <<PollardRunner>>=
@@ -234,12 +228,12 @@ import sys
 def main():
     n = 7031
     f = '[1,0,1]'
-    params = sys.argv[1:]
-    if len(params) == 4 and params[0] == "-n" and params[2] == "-f":
-        n = int(params[1])
-        f = params[3]
-    elif len(params) == 2 and params[0] == "-n":
-        n = int(params[1])
+    args = sys.argv[1:]
+    if len(args) == 4 and args[0] == "-nr" and args[2] == "-func":
+        n = int(args[1])
+        f = args[3]
+    elif len(args) == 2 and args[0] == "-nr":
+        n = int(args[1])
     print("Running Pollard with n={} and f={}".format(n, f))
     result, iters = pollardRunner(n, f)
     print("Result is {}, reached in {} iterations".format(result, iters))
@@ -254,9 +248,9 @@ plot()
 Runner command example: 
 
 ~~~~~{.bash}
-notangle pollard.md >pollard.py && python pollard.py -n 10967535067 -f [1,0,1]
+notangle pollard.md >pollard.py && python pollard.py -nr 10967535067 -func [1,0,1]
 ~~~~~
 
-Use -n to change the number and -f to change the function. 
+Use -nr to change the number and -func to change the function. 
 They default to n=7031 and f=x^2+1 if they are both omitted.
 The function defaults to f=x^2+1 if the -f flag is omitted.
