@@ -31,7 +31,7 @@ To put it shortly, *Floyd's Tortoise and Hare principle* is inspired from the ch
 I think the best example to understand it in the field of CS, or at least that is how I managed to grasp the concept, is to think about how you would find a cycle in a Linked List: you would take a fast pointer, which always skips an element, and a slow pointer, which takes them one by one. The "hare" will catch up with the "tortoise" at a certain lap, as the "hare" loops repeatedly, and thus prove that there is a cycle and its starting point is where they met.   
 
 The *Birthday Problem* says that in a set of n randomly chosen people, some pair of them will have the same birthday with a certain probability P. Naively, P reaches 100% when n=367, because the number of days covers more than a year, however P reaches 99.9% when n=70. \
-This is closely related to the notion of mutually exclusive events in probability and statistics, which says that P(A) = 1 - P(nonA), meaning that if event A happens with a probability P(A), then its complementary event nonA happens with probability 1 - P(A). \
+This is closely related to the notion of mutually exclusive events in probability and statistics, which says that P(A) = 1 - P($\bar{A}$), meaning that if event A happens with a probability P(A), then its complementary event $\bar{A}$ happens with probability 1 - P(A). \
 
 Euler's algorithm for gcd implementation, needed for Pollard's algorithm below. 
 
@@ -87,8 +87,8 @@ Well, if we take a look at xj = f(xj-1) and xj+1 = f(xj) = f(f(xj-1)), we can ea
 This decreases the cost of computing numerous GCD calculations, and ensures the cycle can be found. \
 The idea is that when we use a polynomial, say x^2+1, we generate a sequence of numbers which seems random, but it's in fact pseudorandom, as it can be replicated by also using another function. \
 I think this is where the birthday paradox is used, however how the 'pseudorandomness' is influenced by the paradox is not fully clear to me. \
-As far as I've tested, using f=x^2-2 requires the algorithm to do about 10x more iterations until it finds the solutions, and I believe that it's because it takes longer to find a cycle. \
-\textit {General remark about the algorithm:} it runs indefinitely for prime numbers, so the number is checked beforehand for primality.
+As far as I've tested, using f=x^2-2 requires the algorithm to do about 10x more iterations until it finds the solutions, and I believe that it's because this particular function generates more cycles and thus it doesn't work for several x0's. \
+\textit {General remark about the algorithm:} it runs indefinitely for prime numbers because it gets stuck in the GCD computation loop, as gcd(prime, x)=1, and gcd(1, prime)=1, so it never breaks the loop. 
 
 
 ~~~~~{.python}
@@ -112,7 +112,7 @@ def pollard(n, x0, f):
 ~~~~~
 
 Pollard Function runner, with x0 going from 2 until a solution is found. \
-Another possibility which wasn't implemented is to randomly generate a new free element of the coefficient.
+As mentioned above, the number is tested for primality as the actual algorithm expects a composite number.
 
 ~~~~~{.python}
 <<PollardRunner>>=
@@ -122,14 +122,11 @@ def pollardRunner(n, f):
     if prime(n):
         return None, None
     x0 = 2
-    it = 1
     result = pollard(n, x0, f)
     while result is None:
-        it+=1
         x0+=1
         result = pollard(n, x0, f)
-
-    return result, it
+    return result, x0-1
 @
 ~~~~~
 
@@ -253,4 +250,4 @@ notangle pollard.md >pollard.py && python pollard.py -nr 10967535067 -func [1,0,
 
 Use -nr to change the number and -func to change the function. 
 They default to n=7031 and f=x^2+1 if they are both omitted.
-The function defaults to f=x^2+1 if the -f flag is omitted.
+The function defaults to f=x^2+1 if only the -func flag is omitted.

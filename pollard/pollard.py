@@ -38,14 +38,12 @@ def pollardRunner(n, f):
     if prime(n):
         return None, None
     x0 = 2
-    it = 1
     result = pollard(n, x0, f)
     while result is None:
-        it+=1
         x0+=1
         result = pollard(n, x0, f)
 
-    return result, it
+    return result, x0-1
 
 def testBigNumber():
     n=10967535067
@@ -93,14 +91,12 @@ def pollardRunner(n, f):
     if prime(n):
         return None, None
     x0 = 2
-    it = 1
     result = pollard(n, x0, f)
     while result is None:
-        it+=1
         x0+=1
         result = pollard(n, x0, f)
 
-    return result, it
+    return result, x0-1
 TESTS = {
         50262:[2, 3, 6, 8377, 16754, 25131], 
         50294:[2, 25147], 
@@ -166,14 +162,12 @@ def pollardRunner(n, f):
     if prime(n):
         return None, None
     x0 = 2
-    it = 1
     result = pollard(n, x0, f)
     while result is None:
-        it+=1
         x0+=1
         result = pollard(n, x0, f)
 
-    return result, it
+    return result, x0-1
 
 def plot(x=1000, y=100000, f='[1,0,1]'):
     data = {}
