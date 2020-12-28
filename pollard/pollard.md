@@ -138,7 +138,7 @@ import matplotlib.pylab as plt
 from math import log
 <<PollardRunner>>
 
-def plot(x=1000, y=100000, f='[1,0,1]'):
+def plot(x=1000, y=100000, f='[1,0,-2]'):
     data = {}
     for i in range(x,y): 
         factor, it = pollardRunner(i, f)

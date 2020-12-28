@@ -42,7 +42,6 @@ def pollardRunner(n, f):
     while result is None:
         x0+=1
         result = pollard(n, x0, f)
-
     return result, x0-1
 
 def testBigNumber():
@@ -95,7 +94,6 @@ def pollardRunner(n, f):
     while result is None:
         x0+=1
         result = pollard(n, x0, f)
-
     return result, x0-1
 TESTS = {
         50262:[2, 3, 6, 8377, 16754, 25131], 
@@ -166,10 +164,9 @@ def pollardRunner(n, f):
     while result is None:
         x0+=1
         result = pollard(n, x0, f)
-
     return result, x0-1
 
-def plot(x=1000, y=100000, f='[1,0,1]'):
+def plot(x=1000, y=100000, f='[1,0,-2]'):
     data = {}
     for i in range(x,y): 
         factor, it = pollardRunner(i, f)
