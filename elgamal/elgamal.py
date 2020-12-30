@@ -2,7 +2,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def validate(message):
@@ -14,7 +14,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def sieve(bound):
@@ -31,7 +31,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def get_random_prime(bound):
@@ -42,7 +42,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def get_int_less_than(p):
@@ -52,7 +52,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def gcd(a, b):
@@ -104,31 +104,30 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
-def convert_text_to_digits(text):
-    result = 0
+def convert_characters_to_number(characters):
+    number = 0
     power = 1
-    for char in reversed(text):
-        result += (ALPHABET.find(char) + 1) * power
-        power *= ALPHABET_LENGTH
-    return result
+    for char in reversed(characters):
+        number += power * (ALPHABET.find(char) + 1)
+        power *= (ALPHABET_LENGTH+1)
+    return number
 
 
-def convert_digits_to_text(digits):
-    text = ""
-    while digits:
-        text = ALPHABET[digits % ALPHABET_LENGTH - 1] + text
-        digits = digits // ALPHABET_LENGTH
-        
-    return text
+def convert_number_to_characters(number):
+    characters = ""
+    while number:
+        characters = ALPHABET[number % (ALPHABET_LENGTH+1) - 1]+characters
+        number//=(ALPHABET_LENGTH+1)       
+    return characters
 
 import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 
 def get_int_less_than(p):
@@ -152,9 +151,8 @@ def modular_exp(x, y, p):
 
 def generate_random_text():
     tests = []
-    lengths = [i for i in range(5, 11)]
-    for i in range(10):
-        length = random.choice(lengths)
+    for i in range(25):
+        length = random.randint(5,10)
         message = ""
         for _ in range(length):
             message += random.choice(ALPHABET)
@@ -177,19 +175,17 @@ def test():
         decrypted_text = ""
         chunks = [test_message[i:i + CHUNK_LENGTH] for i in range(0, len(test_message), CHUNK_LENGTH)]
         for c in chunks:
-            m = convert_text_to_digits(c)
+            nr = convert_characters_to_number(c)
 
             k = get_int_less_than(p)
             alpha = modular_exp(g, k, p)
-            beta = m * modular_exp(ga, k, p) % p
+            beta = nr * modular_exp(ga, k, p) % p
 
-            decrypted_digits = modular_exp(alpha, p - 1 - a, p) * beta % p
-            decrypted_text += convert_digits_to_text(decrypted_digits)
+            decrypted_number = modular_exp(alpha, p - 1 - a, p) * beta % p
+            decrypted_text += convert_number_to_characters(decrypted_number)
 
         print(test_message, decrypted_text)
         assert decrypted_text == test_message
-
-    print("el gamal tests passed")
 
 
 def main():
@@ -197,12 +193,13 @@ def main():
     args = sys.argv[1:]
     initial_message = ""
     if not args:
-        initial_message = "alex"
+        initial_message = "el gamal"
     elif args[0] == "-m":
         initial_message = " ".join(args[1:])
     elif args[0] == "-t":
-        print("el gamal tests will be run")
+        print("el gamal tests starting")
         test()
+        print("el gamal tests passed")
         return
 
     print("message:" + initial_message)
@@ -222,13 +219,13 @@ def main():
     decrypted_text = ""
     chunks = [initial_message[i:i + CHUNK_LENGTH] for i in range(0, len(initial_message), CHUNK_LENGTH)]
     for c in chunks:
-        m = convert_text_to_digits(c)
+        nr = convert_characters_to_number(c)
         k = get_int_less_than(p)
         alpha = modular_exp(g, k, p)
-        beta = m * modular_exp(ga, k, p) % p
+        beta = nr * modular_exp(ga, k, p) % p
 
-        decrypted_digits = modular_exp(alpha, p - 1 - a, p) * beta % p
-        decrypted_text += convert_digits_to_text(decrypted_digits)
+        decrypted_number = modular_exp(alpha, p - 1 - a, p) * beta % p
+        decrypted_text += convert_number_to_characters(decrypted_number)
 
     print("decrypted message:" + decrypted_text)
     assert decrypted_text == initial_message

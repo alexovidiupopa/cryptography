@@ -31,16 +31,23 @@ The public key consists of a large prime number **p**, a generator **g** of the 
 from the interval \[1, p-2] and is equal to the private key. \
 For the purpose of the exercise, I've implemented a modular exponentiation function even though the python pow is significantly faster as far as I've read. \
 
-Because a super-computer is not that easily obtainable, the prime numbers I generate go up to 10^7, and that is unfortunately not enough to 
+Because a super-computer is not that easily obtainable, the prime numbers I generate go up to 10^7, as for 10^8 it already takes a good minute to run, 
+and that is unfortunately not enough to 
 encrypt larger messages without splitting them into chunks. However, in theory, very large prime numbers are relatively easy to get and 
 that's why El Gamal's algorithm does not involve message splitting. \
+
+Before encrypting and before decrypting, we need to convert the message into a number and then a number into a text, because the algorithm
+works with numbers, so we need to make the first conversion, and at the end we expect another message, so we need to make the second one. \
 
 When we encrypt, we select another random number k (from the same interval as above), and create a pair ($\alpha,\beta$) which will be the cipher text. \
 When we decrypt, we apply the formula from the lecture, and in it lies the proof of correctness of the algorithm: if we replace alpha and beta in the formula,
 that -a at the power of alpha causes the g^(a*k) given by beta to cancel out with the other one given by alpha which will have a minus, and we are left with the message m. \
 This is why it is very hard to hack the message without knowing the private key (a), and why El Gamal is (for now) safe and widely used.
 
-We start by defining our alphabet and our constant chunk length.
+Having said all of this, I will now start showing each function in its corresponding code chunk. \
+
+We declare the alphabet as a constant string consisting of all the characters in the requirement, namely the English alphabet and the blank space.
+We also keep track of our desired chunk length, meaning the length of character blocks, and the length of the alphabet.
 
 ~~~~~{.python}
 <<Constants>>=
@@ -48,7 +55,7 @@ import random
 
 ALPHABET = ' abcdefghijklmnopqrstuvwxyz'
 CHUNK_LENGTH = 3
-ALPHABET_LENGTH = len(ALPHABET)+1
+ALPHABET_LENGTH = len(ALPHABET)
 
 @
 ~~~~~
@@ -207,22 +214,21 @@ Conversion functions, from message to digits and vice versa, which is nothing mo
 <<Conversions>>=
 <<Constants>>
 
-def convert_text_to_digits(text):
-    result = 0
+def convert_characters_to_number(characters):
+    number = 0
     power = 1
-    for char in reversed(text):
-        result += (ALPHABET.find(char) + 1) * power
-        power *= ALPHABET_LENGTH
-    return result
+    for char in reversed(characters):
+        number += power * (ALPHABET.find(char) + 1)
+        power *= (ALPHABET_LENGTH+1)
+    return number
 
 
-def convert_digits_to_text(digits):
-    text = ""
-    while digits:
-        text = ALPHABET[digits % ALPHABET_LENGTH - 1] + text
-        digits = digits // ALPHABET_LENGTH
-        
-    return text
+def convert_number_to_characters(number):
+    characters = ""
+    while number:
+        characters = ALPHABET[number % (ALPHABET_LENGTH+1) - 1]+characters
+        number//=(ALPHABET_LENGTH+1)       
+    return characters
 
 @
 ~~~~~
@@ -240,9 +246,8 @@ and the second one which performs the actual encryption/decryption process on th
 
 def generate_random_text():
     tests = []
-    lengths = [i for i in range(5, 11)]
-    for i in range(10):
-        length = random.choice(lengths)
+    for i in range(25):
+        length = random.randint(5,10)
         message = ""
         for _ in range(length):
             message += random.choice(ALPHABET)
@@ -265,19 +270,17 @@ def test():
         decrypted_text = ""
         chunks = [test_message[i:i + CHUNK_LENGTH] for i in range(0, len(test_message), CHUNK_LENGTH)]
         for c in chunks:
-            m = convert_text_to_digits(c)
+            nr = convert_characters_to_number(c)
 
             k = get_int_less_than(p)
             alpha = modular_exp(g, k, p)
-            beta = m * modular_exp(ga, k, p) % p
+            beta = nr * modular_exp(ga, k, p) % p
 
-            decrypted_digits = modular_exp(alpha, p - 1 - a, p) * beta % p
-            decrypted_text += convert_digits_to_text(decrypted_digits)
+            decrypted_number = modular_exp(alpha, p - 1 - a, p) * beta % p
+            decrypted_text += convert_number_to_characters(decrypted_number)
 
         print(test_message, decrypted_text)
         assert decrypted_text == test_message
-
-    print("el gamal tests passed")
 
 @
 ~~~~~
@@ -295,12 +298,13 @@ def main():
     args = sys.argv[1:]
     initial_message = ""
     if not args:
-        initial_message = "alex"
+        initial_message = "el gamal"
     elif args[0] == "-m":
         initial_message = " ".join(args[1:])
     elif args[0] == "-t":
-        print("el gamal tests will be run")
+        print("el gamal tests starting")
         test()
+        print("el gamal tests passed")
         return
 
     print("message:" + initial_message)
@@ -320,13 +324,13 @@ def main():
     decrypted_text = ""
     chunks = [initial_message[i:i + CHUNK_LENGTH] for i in range(0, len(initial_message), CHUNK_LENGTH)]
     for c in chunks:
-        m = convert_text_to_digits(c)
+        nr = convert_characters_to_number(c)
         k = get_int_less_than(p)
         alpha = modular_exp(g, k, p)
-        beta = m * modular_exp(ga, k, p) % p
+        beta = nr * modular_exp(ga, k, p) % p
 
-        decrypted_digits = modular_exp(alpha, p - 1 - a, p) * beta % p
-        decrypted_text += convert_digits_to_text(decrypted_digits)
+        decrypted_number = modular_exp(alpha, p - 1 - a, p) * beta % p
+        decrypted_text += convert_number_to_characters(decrypted_number)
 
     print("decrypted message:" + decrypted_text)
     assert decrypted_text == initial_message
@@ -344,4 +348,5 @@ notangle elgamal.md > elgamal.py && python elgamal.py -t
 ~~~~~
 
 Use -m to give a message separated by spaces, use -t to run the tests.
-Message defaults to "alex" if one omits both flags, and the tests aren't run.
+Message defaults to "el gamal" if one omits both flags, and the tests aren't run. \
+Computing the prime p and the generator g takes a few seconds, so it will take a bit until the keys are generated and you'll see the result.
